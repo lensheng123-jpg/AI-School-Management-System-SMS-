@@ -1,0 +1,157 @@
+﻿{% extends 'base.html' %}
+{% block title %}Options — {{ case.title }}{% endblock %}
+{% block content %}
+
+<a href="{{ url_for('case_detail', case_id=case.case_id) }}" class="btn btn-sm btn-outline-secondary mb-3">
+  <i class="bi bi-arrow-left"></i> Back to Case
+</a>
+
+<h1 class="page-title">Options</h1>
+<p class="page-sub">{{ case.decision_question }}</p>
+
+<div class="alert alert-warning mb-4">
+  <i class="bi bi-info-circle-fill"></i>
+  <span><strong>Reminder:</strong> Options are not ranked. The leader decides.</span>
+</div>
+
+<!-- AI TRADE-OFF ANALYSIS TABLE -->
+<div class="card ai-card mb-4" id="ai-analysis-card">
+  <div class="card-header hdr-primary d-flex justify-content-between align-items-center">
+    <span><span class="header-icon"><i class="bi bi-cpu"></i></span> AI Trade-off Analysis</span>
+    <span class="badge badge-advisory">Advisory only</span>
+  </div>
+  <div class="card-body p-0">
+    <div id="ai-loading" class="p-3">
+      <div class="loading-text">
+        <span>AI is analysing the trade-offs</span>
+        <span class="loading-dots"><span></span><span></span><span></span></span>
+      </div>
+    </div>
+    
+    <!-- The AI text will be parsed into this table -->
+    <table class="table table-bordered mb-0 d-none" id="ai-table">
+      <thead class="table-light">
+        <tr>
+          <th style="width: 20%;">Option</th>
+          <th style="width: 40%;">Potential Benefit (AI)</th>
+          <th style="width: 40%;">Potential Risk (AI)</th>
+        </tr>
+      </thead>
+      <tbody id="ai-table-body">
+        <!-- JS will insert rows here -->
+      </tbody>
+    </table>
+
+    <!-- Fallback if AI format fails -->
+    <div id="ai-fallback" class="p-3 d-none">
+       <p class="text-muted mb-0" id="ai-fallback-text"></p>
+    </div>
+  </div>
+</div>
+
+<!-- DATASET OPTIONS TABLE -->
+<div class="card mb-4">
+  <div class="card-header hdr-gray">
+    <span class="header-icon"><i class="bi bi-list-task"></i></span>
+    Dataset Options Details
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-light">
+        <tr>
+          <th style="width: 5%;">#</th>
+          <th style="width: 25%;">Option</th>
+          <th style="width: 20%;">Benefit</th>
+          <th style="width: 20%;">Drawback</th>
+          <th style="width: 15%;">Dependency</th>
+          <th style="width: 15%;">Uncertainty</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in options %}
+        <tr>
+          <td><span class="badge bg-primary">{{ o.display_order }}</span></td>
+          <td class="fw-semibold">{{ o.option_text }}</td>
+          <td class="small text-muted">{{ o.benefit }}</td>
+          <td class="small text-muted">{{ o.drawback }}</td>
+          <td class="small text-muted">{{ o.dependency }}</td>
+          <td class="small text-muted">{{ o.uncertainty }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div>
+  {% if decision and decision.confirmation_status == 'human_confirmed' %}
+    <a href="{{ url_for('action_plan', case_id=case.case_id) }}" class="btn btn-primary btn-lg">
+      <i class="bi bi-clipboard-check"></i> View Action Plan
+    </a>
+  {% else %}
+    <a href="{{ url_for('decide', case_id=case.case_id) }}" class="btn btn-warning btn-lg">
+      <i class="bi bi-person-check-fill"></i> Proceed to Human Decision
+    </a>
+  {% endif %}
+</div>
+
+<script>
+(function() {
+  const caseId = "{{ case.case_id }}";
+  const loadingDiv = document.getElementById('ai-loading');
+  const tableDiv = document.getElementById('ai-table');
+  const tableBody = document.getElementById('ai-table-body');
+  const fallbackDiv = document.getElementById('ai-fallback');
+  const fallbackText = document.getElementById('ai-fallback-text');
+
+  fetch(`/case/${caseId}/ai-options`)
+    .then(r => r.json())
+    .then(data => {
+      loadingDiv.classList.add('d-none');
+      
+      if (data.analysis) {
+        // Attempt to parse the AI text into rows
+        const text = data.analysis;
+        
+        // Regex to find Option, Benefit, and Risk
+        const regex = /Option\s*(\d+)[:\-\s]*(.*?)[\n\r]+.*?Benefit[:\-\s]*(.*?)[\n\r]+.*?Risk[:\-\s]*(.*?)(?=Option\s*\d+|$)/gis;
+        let match;
+        let foundMatches = false;
+
+        while ((match = regex.exec(text)) !== null) {
+          foundMatches = true;
+          const optNum = match[1];
+          const benefit = match[3].trim();
+          const risk = match[4].trim();
+          
+          const row = `
+            <tr>
+              <td class="fw-bold text-center bg-light">Option ${optNum}</td>
+              <td class="text-success"><i class="bi bi-check-circle-fill me-1"></i> ${benefit}</td>
+              <td class="text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i> ${risk}</td>
+            </tr>
+          `;
+          tableBody.insertAdjacentHTML('beforeend', row);
+        }
+
+        if (foundMatches) {
+          tableDiv.classList.remove('d-none');
+        } else {
+          // If AI didn't follow the format perfectly, show raw text
+          fallbackDiv.classList.remove('d-none');
+          fallbackText.innerText = text;
+        }
+      } else {
+        fallbackDiv.classList.remove('d-none');
+        fallbackText.innerText = "AI analysis unavailable right now. Compare the options below.";
+      }
+    })
+    .catch(() => {
+      loadingDiv.classList.add('d-none');
+      fallbackDiv.classList.remove('d-none');
+      fallbackText.innerText = "AI analysis unavailable. Compare the options below.";
+    });
+})();
+</script>
+
+{% endblock %}

@@ -1,0 +1,88 @@
+﻿{% extends 'base.html' %}
+{% block title %}Human Decision — {{ case.title }}{% endblock %}
+{% block content %}
+
+<a href="{{ url_for('case_detail', case_id=case.case_id) }}" class="btn btn-sm btn-outline-secondary mb-3">
+  <i class="bi bi-arrow-left"></i> Back to Case Details
+</a>
+
+<h1 class="page-title">Human Decision Gate</h1>
+<p class="page-sub text-danger fw-semibold">
+  <i class="bi bi-shield-lock-fill"></i>
+  AI advises only. You must confirm the final decision.
+</p>
+
+{% if decision and decision.confirmation_status == 'human_confirmed' %}
+  <div class="alert alert-success mt-4">
+    <i class="bi bi-check-circle-fill"></i>
+    <span>Decision already confirmed on {{ decision.decision_date }}.</span>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <p><strong>Decision:</strong> {{ decision.human_decision_text }}</p>
+      <p><strong>Rationale:</strong> {{ decision.human_rationale }}</p>
+    </div>
+  </div>
+  <a href="{{ url_for('action_plan', case_id=case.case_id) }}" class="btn btn-primary mt-3">
+    <i class="bi bi-clipboard-check"></i> View Action Plan
+  </a>
+
+{% else %}
+
+  {% if session['role'] == 'Admin' %}
+    <!-- ADMIN VIEW ONLY -->
+    <div class="alert alert-danger mt-4">
+      <i class="bi bi-shield-lock-fill"></i>
+      <strong>Admin View Only:</strong> You are logged in as an Administrator. Only the School Leader has the authority to confirm a final decision.
+    </div>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary mt-2">Back to Dashboard</a>
+  
+  {% else %}
+    <!-- SCHOOL LEADER FORM -->
+    <form method="POST" class="mt-3">
+      <div class="card">
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">1. Select an option (optional)</label>
+            <select name="selected_option" class="form-select" id="optionSelect">
+              <option value="">— None / I will write my own —</option>
+              {% for o in options %}
+              <option value="{{ o.option_id }}" data-text="{{ o.option_text }}">{{ o.option_text }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">2. Final decision text</label>
+            <textarea name="decision_text" id="decisionText" class="form-control" rows="3" required></textarea>
+            <small class="text-muted">You may edit, replace, or write your own.</small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">3. Your rationale</label>
+            <textarea name="rationale" class="form-control" rows="3" required></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">4. Review date</label>
+            <input type="date" name="review_date" class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-confirm mt-3" onclick="return confirm('Confirm this as your final human decision?');">
+        <i class="bi bi-check-circle-fill"></i> Confirm Human Decision
+      </button>
+    </form>
+
+    <script>
+      document.getElementById('optionSelect').addEventListener('change', function () {
+        const text = this.options[this.selectedIndex].getAttribute('data-text');
+        if (text) document.getElementById('decisionText').value = text;
+      });
+    </script>
+  {% endif %}
+
+{% endif %}
+
+{% endblock %}

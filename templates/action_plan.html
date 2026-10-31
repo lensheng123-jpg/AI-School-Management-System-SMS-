@@ -1,0 +1,70 @@
+﻿{% extends 'base.html' %}
+{% block title %}Action Plan — {{ case.title }}{% endblock %}
+{% block content %}
+
+<a href="{{ url_for('decide', case_id=case.case_id) }}" class="btn btn-sm btn-outline-secondary mb-3">
+  <i class="bi bi-arrow-left"></i> Back to Decision
+</a>
+
+<h1 class="page-title">Action Plan</h1>
+
+<div class="alert alert-success mb-4">
+  <i class="bi bi-check-circle-fill"></i>
+  <span>Action plan generated only after human confirmation.</span>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header hdr-success">
+    <span class="header-icon"><i class="bi bi-check-circle"></i></span>
+    Confirmed Decision
+  </div>
+  <div class="card-body">
+    <p class="mb-2"><strong>Decision:</strong> {{ decision.human_decision_text }}</p>
+    <p class="mb-2"><strong>Rationale:</strong> {{ decision.human_rationale }}</p>
+    <p class="mb-2"><strong>Confirmed:</strong> {{ decision.decision_date }}</p>
+    <p class="mb-0"><strong>Review:</strong> {{ decision.review_date or 'Not set' }}</p>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header hdr-primary">
+    <span class="header-icon"><i class="bi bi-list-task"></i></span>
+    Action Items
+  </div>
+  <table class="table mb-0">
+    <thead>
+      <tr>
+        <th>Task</th>
+        <th>Owner</th>
+        <th>Due</th>
+        <th>Communication</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Communicate decision to affected parties</td>
+        <td>School Leader</td>
+        <td>{{ decision.review_date or 'TBD' }}</td>
+        <td>Approved message</td>
+      </tr>
+      <tr>
+        <td>Implement selected option</td>
+        <td>Relevant lead</td>
+        <td>{{ decision.review_date or 'TBD' }}</td>
+        <td>Internal note</td>
+      </tr>
+      <tr>
+        <td>Review outcome</td>
+        <td>School Leader</td>
+        <td>{{ decision.review_date or 'TBD' }}</td>
+        <td>Review meeting</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<a href="{{ url_for('audit', case_id=case.case_id) }}" class="btn btn-secondary">
+  <i class="bi bi-shield-check"></i> View Audit &amp; Privacy Note
+</a>
+
+{% endblock %}

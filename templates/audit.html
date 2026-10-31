@@ -1,0 +1,84 @@
+﻿{% extends 'base.html' %}
+{% block title %}Audit — {{ case.title }}{% endblock %}
+{% block content %}
+
+<a href="{{ url_for('action_plan', case_id=case.case_id) }}" class="btn btn-sm btn-outline-secondary mb-3">
+  <i class="bi bi-arrow-left"></i> Back to Action Plan
+</a>
+
+<h1 class="page-title">Audit &amp; Privacy Note</h1>
+<p class="page-sub">Case: <span class="case-id-code">{{ case.case_id }}</span> — {{ case.title }}</p>
+
+<div class="card mb-3">
+  <div class="card-header hdr-gray">
+    <span class="header-icon"><i class="bi bi-collection"></i></span>
+    Evidence Used
+  </div>
+  <div class="card-body p-0">
+    {% for e in evidence %}
+    <div class="evidence-item">
+      <small class="text-muted">{{ e.evidence_id }}</small> — {{ e.text }}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header hdr-warning">
+    <span class="header-icon"><i class="bi bi-question-circle"></i></span>
+    Assumptions &amp; Gaps
+  </div>
+  <div class="card-body">
+    {% if analysis %}
+      <p class="mb-2">{{ analysis.evidence_gap }}</p>
+      <p class="mb-0 text-muted">{{ analysis.uncertainty_note }}</p>
+    {% else %}
+      <p class="text-muted mb-0">None recorded.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header hdr-info">
+    <span class="header-icon"><i class="bi bi-list-check"></i></span>
+    Options Presented
+  </div>
+  <div class="card-body p-0">
+    {% for o in options %}
+    <div class="evidence-item">
+      Option {{ o.display_order }}: {{ o.option_text }}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header hdr-success">
+    <span class="header-icon"><i class="bi bi-check-circle"></i></span>
+    Human Decision Record
+  </div>
+  <div class="card-body">
+    {% if decision %}
+      <p class="mb-2"><strong>Decision:</strong> {{ decision.human_decision_text }}</p>
+      <p class="mb-2"><strong>Rationale:</strong> {{ decision.human_rationale }}</p>
+      <p class="mb-2"><strong>Status:</strong> {{ decision.confirmation_status }}</p>
+      <p class="mb-0"><strong>Recorded:</strong> {{ decision.decision_date }}</p>
+    {% else %}
+      <p class="text-muted mb-0">No human decision recorded.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header hdr-gray">
+    <span class="header-icon"><i class="bi bi-shield-lock"></i></span>
+    Privacy &amp; Retention
+  </div>
+  <div class="card-body">
+    <p class="mb-2">Synthetic data only. No real identifiers present.</p>
+    <p class="mb-2">Retention: demonstration only.</p>
+    <p class="mb-0">Developer feedback must be anonymised (BR10).</p>
+  </div>
+</div>
+
+{% endblock %}
