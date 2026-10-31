@@ -2,7 +2,7 @@
 
 **Final Year Project I**  
 **Author:** Na Kuan Li (BIT_B2201F-2505002)  
-**Live Prototype:** [https://Kuanli123.pythonanywhere.com](https://Kuanli123.pythonanywhere.com) *(Replace with your actual PythonAnywhere URL)*
+**Live Prototype:** [https://Kuanli123.pythonanywhere.com](https://Kuanli123.pythonanywhere.com) 
 
 ## 📖 Project Overview
 The AI-SMS is a web-based, human-in-the-loop decision-support prototype designed for international school leaders. It organises evidence, detects gaps, maps stakeholders, and generates unranked options using AI. 
