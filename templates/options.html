@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% block title %}Options — {{ case.title }}{% endblock %}
 {% block content %}
 
@@ -32,9 +32,9 @@
     <table class="table table-bordered mb-0 d-none" id="ai-table">
       <thead class="table-light">
         <tr>
-          <th style="width: 20%;">Option</th>
-          <th style="width: 40%;">Potential Benefit (AI)</th>
-          <th style="width: 40%;">Potential Risk (AI)</th>
+          <th style="width: 15%;" class="text-center">Option</th>
+          <th style="width: 42.5%;">Potential Benefit (AI)</th>
+          <th style="width: 42.5%;">Potential Risk (AI)</th>
         </tr>
       </thead>
       <tbody id="ai-table-body">
@@ -104,31 +104,36 @@
   const fallbackDiv = document.getElementById('ai-fallback');
   const fallbackText = document.getElementById('ai-fallback-text');
 
+  function cleanText(str) {
+    return (str || '')
+      .replace(/\*\*/g, '')
+      .replace(/^[\s\*\-\•\:]+/, '')
+      .replace(/[\s\*]+$/, '')
+      .trim();
+  }
+
   fetch(`/case/${caseId}/ai-options`)
     .then(r => r.json())
     .then(data => {
       loadingDiv.classList.add('d-none');
       
       if (data.analysis) {
-        // Attempt to parse the AI text into rows
         const text = data.analysis;
-        
-        // Regex to find Option, Benefit, and Risk
-        const regex = /Option\s*(\d+)[:\-\s]*(.*?)[\n\r]+.*?Benefit[:\-\s]*(.*?)[\n\r]+.*?Risk[:\-\s]*(.*?)(?=Option\s*\d+|$)/gis;
+        const regex = /Option\s*(\d+)[^\n\r]*[\n\r]+[^\n\r]*?Benefit[^\n\r:]*[:\-]\s*(.*?)[\n\r]+[^\n\r]*?Risk[^\n\r:]*[:\-]\s*(.*?)(?=(?:[\n\r]+\s*[\*\#\-]*\s*Option\s*\d+)|$)/gis;
         let match;
         let foundMatches = false;
 
         while ((match = regex.exec(text)) !== null) {
           foundMatches = true;
           const optNum = match[1];
-          const benefit = match[3].trim();
-          const risk = match[4].trim();
+          const benefit = cleanText(match[2]);
+          const risk = cleanText(match[3]);
           
           const row = `
             <tr>
-              <td class="fw-bold text-center bg-light">Option ${optNum}</td>
-              <td class="text-success"><i class="bi bi-check-circle-fill me-1"></i> ${benefit}</td>
-              <td class="text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i> ${risk}</td>
+              <td class="fw-bold text-center bg-light align-middle">Option ${optNum}</td>
+              <td class="text-success align-middle"><i class="bi bi-check-circle-fill me-1"></i> ${benefit}</td>
+              <td class="text-danger align-middle"><i class="bi bi-exclamation-triangle-fill me-1"></i> ${risk}</td>
             </tr>
           `;
           tableBody.insertAdjacentHTML('beforeend', row);
@@ -137,7 +142,6 @@
         if (foundMatches) {
           tableDiv.classList.remove('d-none');
         } else {
-          // If AI didn't follow the format perfectly, show raw text
           fallbackDiv.classList.remove('d-none');
           fallbackText.innerText = text;
         }
