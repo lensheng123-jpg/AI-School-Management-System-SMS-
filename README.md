@@ -5,7 +5,7 @@
 **Live Prototype:** [https://Kuanli123.pythonanywhere.com](https://Kuanli123.pythonanywhere.com) 
 
 ## 📖 Project Overview
-The AI-SMS is a web-based, human-in-the-loop decision-support prototype designed for international school leaders. It organises evidence, detects gaps, maps stakeholders, and generates unranked options using AI. 
+The AI-SMS is a web-based, human-in-the-loop decision-support prototype designed for educational school leaders. It organises evidence, detects gaps, maps stakeholders, and generates unranked options using AI. 
 
 **Core Rule:** AI advises only. The School Leader makes the final decision. The system enforces a mandatory Human Decision Gate before any action plan is created.
 
